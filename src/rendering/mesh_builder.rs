@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std::mem::size_of;
+use std::ptr::null;
 use rendering::gl;
 use rendering::types::*;
 
@@ -61,6 +62,7 @@ impl Vertex for DefaultVertex {
 
 pub struct Mesh {
 	pub vbo: u32,
+	pub ebo: u32,
 	pub count: u32,
 	pub layout: VertexLayout,
 }
@@ -69,6 +71,7 @@ impl Mesh {
 	pub fn new() -> Self {
 		Mesh {
 			vbo: gl::pls_make_buffer(),
+			ebo: gl::pls_make_buffer(),
 			count: 0,
 			layout: VertexLayout::null(),
 		}
@@ -76,22 +79,20 @@ impl Mesh {
 
 	pub fn bind(&self) {
 		unsafe {
+			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ebo);
 			gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
 
 			for ab in self.layout.attributes.iter() {
 				gl::EnableVertexAttribArray(ab.index);
 				gl::VertexAttribPointer(ab.index, ab.width, gl::FLOAT, gl::FALSE, self.layout.size as i32, ab.offset as _);
 			}
-
-			// gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, Vertex::get_size() as _, 0 as _);
-			// gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, Vertex::get_size() as _, 12 as _);
-			// gl::VertexAttribPointer(2, 2, gl::FLOAT, gl::FALSE, Vertex::get_size() as _, 24 as _);
 		}
 	}
 
 	pub fn draw(&self, mode: u32) {
 		unsafe {
-			gl::DrawArrays(mode, 0, self.count as _);
+			// gl::DrawArrays(mode, 0, self.count as _);
+			gl::DrawElements(mode, self.count as _, gl::UNSIGNED_SHORT, null());
 		}
 	}
 }
@@ -100,53 +101,68 @@ impl Mesh {
 
 pub struct MeshBuilder<V: Vertex> {
 	verts: Vec<V>,
+	indices: Vec<u16>, // NOTE: could probably be an option
 }
 
 impl<V> MeshBuilder<V> where V: Vertex {
 	pub fn new() -> Self {
 		MeshBuilder {
 			verts: Vec::new(),
+			indices: Vec::new(),
 		}
 	}
 
 	pub fn clear(&mut self) {
 		self.verts.clear();
+		self.indices.clear();
 	}
 
 	pub fn upload_to(&self, mesh: &mut Mesh) {
 		unsafe {
 			mesh.layout = V::get_layout();
-			mesh.count = self.verts.len() as _;
-			let size = mesh.layout.size * mesh.count;
+			mesh.count = self.indices.len() as _;
+			let vert_size = mesh.layout.size * self.verts.len() as u32;
+			let idx_size = size_of::<u16>() * self.indices.len();
 
 			gl::BindBuffer(gl::ARRAY_BUFFER, mesh.vbo);
-			gl::BufferData(gl::ARRAY_BUFFER, size as _, self.verts.as_ptr() as _, gl::STATIC_DRAW);
+			gl::BufferData(gl::ARRAY_BUFFER, vert_size as _, self.verts.as_ptr() as _, gl::STATIC_DRAW);
+
+			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, mesh.ebo);
+			gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, idx_size as _, self.indices.as_ptr() as _, gl::STATIC_DRAW);
 		}
 	}
 
 	pub fn add_vert(&mut self, v: V) {
+		self.indices.push(self.verts.len() as _);
 		self.verts.push(v);
 	}
 
 	pub fn add_quad(&mut self, vs: &[V]) {
 		assert!(vs.len() >= 4);
 
-		self.verts.push(vs[0]);
-		self.verts.push(vs[1]);
-		self.verts.push(vs[2]);
+		let base = self.verts.len() as u16;
+		self.verts.extend(&vs[..4]);
 
-		self.verts.push(vs[0]);
-		self.verts.push(vs[2]);
-		self.verts.push(vs[3]);
+		self.indices.push(base + 0);
+		self.indices.push(base + 1);
+		self.indices.push(base + 2);
+
+		self.indices.push(base + 0);
+		self.indices.push(base + 2);
+		self.indices.push(base + 3);
 	}
 
 	pub fn add_convex_poly(&mut self, vs: &[V]) {
 		assert!(vs.len() >= 3);
 
+		let base = self.verts.len() as u16;
+		self.verts.extend(vs);
+
 		for i in 1..vs.len()-1 {
-			self.verts.push(vs[0]);
-			self.verts.push(vs[i]);
-			self.verts.push(vs[i+1]);
+			let i = i as u16;
+			self.indices.push(base + 0);
+			self.indices.push(base + i);
+			self.indices.push(base + i+1);
 		}
 	}
 }

@@ -48,11 +48,11 @@ impl FlowerManager {
 			let wind_variation = (flower.pos.x + flower.pos.y) * wind_variability;
 
 			let wind_strength = ((self.wind_strength_phase - wind_variation) * PI * 2.0).cos() * 0.5 + 0.5;
-			let wind_strength = wind_strength.ease_linear(0.1, 1.0);
+			let wind_strength = wind_strength.ease_linear(0.2, 1.0);
 
 			let wind_omega = (self.wind_phase - wind_variation) * PI * 2.0;
 			let face_delay = 0.3;
-			let sway_amt = PI/24.0 * wind_strength;
+			let sway_amt = PI/16.0 * wind_strength;
 
 			let stem_ang = wind_omega.sin() * sway_amt + PI/2.0;
 			let stem = flower.pos + Vec2::from_angle(stem_ang) * flower.stem_length;

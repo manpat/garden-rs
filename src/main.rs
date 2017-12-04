@@ -14,7 +14,7 @@ pub use common::*;
 
 pub mod resources;
 pub mod rendering;
-pub mod console;
+// pub mod console;
 pub mod paper;
 pub mod webgl;
 
@@ -22,7 +22,7 @@ pub mod flower;
 
 use bindings::emscripten::*;
 use coro_util::*;
-use console::*;
+// use console::*;
 use webgl::*;
 use paper::*;
 
@@ -33,8 +33,8 @@ use rendering::shader::*;
 
 fn main() {
 	set_coro_as_main_loop(|| {
-		let mut console = Console::new();
-		console.set_text("Hello");
+		// let mut console = Console::new();
+		// console.set_text("Hello");
 
 		let _gl = WebGLContext::new();
 
@@ -66,6 +66,15 @@ fn main() {
 
 		flowers.add_flower(Vec2::new( 0.0,-0.3));
 
+		// use rand::{thread_rng, Rng};
+		// let mut rng = thread_rng();
+
+		// for _ in 0..200 {
+		// 	let x = rng.gen_range(-16.0/9.0, 16.0/9.0);
+		// 	let y = rng.gen_range(-1.0, 1.0);
+		// 	flowers.add_flower(Vec2::new(x,y));
+		// }
+
 		loop {
 			for e in events.iter() {
 				match *e {
@@ -89,11 +98,11 @@ fn main() {
 				}
 			}
 
-			unsafe { gl::Clear(gl::COLOR_BUFFER_BIT); }
-
 			events.clear();
 
-			console.update();
+			unsafe { gl::Clear(gl::COLOR_BUFFER_BIT); }
+
+			// console.update();
 			flowers.update();
 
 			paper.clear();
