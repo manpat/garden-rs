@@ -9,12 +9,11 @@ extern crate common;
 pub use resources as res;
 pub use common::*;
 
-#[macro_use]
-pub mod bindings;
+#[macro_use] pub mod bindings;
+#[macro_use] pub mod coro_util;
 
 pub mod resources;
 pub mod rendering;
-pub mod coro_util;
 pub mod console;
 pub mod paper;
 pub mod webgl;
