@@ -145,10 +145,10 @@ impl Paper {
 	}
 
 	pub fn build_circle(&mut self, p: Vec2, r: f32, color: Vec4) {
-		self.build_oval(p, Vec2::splat(r), color);
+		self.build_ellipse(p, Vec2::splat(r), color);
 	}
 
-	pub fn build_oval(&mut self, p: Vec2, rs: Vec2, color: Vec4) {
+	pub fn build_ellipse(&mut self, p: Vec2, rs: Vec2, color: Vec4) {
 		let mut vs = Vec::new();
 		let steps = 36i32;
 

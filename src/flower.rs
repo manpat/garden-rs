@@ -57,7 +57,7 @@ impl FlowerManager {
 			let stem_ang = wind_omega.sin() * sway_amt + PI/2.0;
 			let stem = flower.pos + Vec2::from_angle(stem_ang) * flower.stem_length;
 
-			paper.build_oval(flower.pos + Vec2::new(0.0, -flower.face_radius * yskew / 3.0),
+			paper.build_ellipse(flower.pos + Vec2::new(0.0, -flower.face_radius * yskew / 3.0),
 				Vec2::splat(flower.face_radius * 0.8) * Vec2::new(1.0, yskew),
 				Vec4::new(0.0, 0.0, 0.0, 0.05));
 
@@ -96,7 +96,7 @@ impl FlowerManager {
 
 		for coro in self.flower_updates.iter_mut() { coro.next(); }
 
-		self.flower_updates.retain(|c| c.valid);
+		self.flower_updates.retain(Coro::is_valid);
 	}
 
 	pub fn add_flower(&mut self, pos: Vec2) {

@@ -15,18 +15,20 @@ pub use common::*;
 pub mod resources;
 pub mod rendering;
 // pub mod console;
-pub mod paper;
 pub mod webgl;
 
+pub mod paper;
 pub mod flower;
+pub mod particle;
 
 use bindings::emscripten::*;
 use coro_util::*;
 // use console::*;
 use webgl::*;
-use paper::*;
 
+use paper::*;
 use flower::*;
+use particle::*;
 
 use rendering::gl;
 use rendering::shader::*;
@@ -64,16 +66,9 @@ fn main() {
 		let mut flowers = FlowerManager::new();
 		let mut paper = Paper::new();
 
-		flowers.add_flower(Vec2::new( 0.0,-0.3));
+		let mut particles = ParticleManager::new();
 
-		// use rand::{thread_rng, Rng};
-		// let mut rng = thread_rng();
-
-		// for _ in 0..200 {
-		// 	let x = rng.gen_range(-16.0/9.0, 16.0/9.0);
-		// 	let y = rng.gen_range(-1.0, 1.0);
-		// 	flowers.add_flower(Vec2::new(x,y));
-		// }
+		flowers.add_flower(Vec2::new(0.0, -0.1));
 
 		loop {
 			for e in events.iter() {
@@ -93,7 +88,9 @@ fn main() {
 
 						let norm = clk.to_vec2() / screen_size.to_vec2() * 2.0 - Vec2::splat(1.0);
 						let norm = norm * Vec2::new(aspect, -1.0);
+						
 						flowers.add_flower(norm);
+						particles.add_pop(norm);
 					}
 				}
 			}
@@ -108,6 +105,8 @@ fn main() {
 			paper.clear();
 			flowers.draw(&mut paper);
 			paper.draw();
+
+			particles.draw();
 
 			yield;
 		}

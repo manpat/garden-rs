@@ -28,9 +28,13 @@ extern "C" fn resume_main_coro(ctx: *mut CVoid) {
 
 pub struct Coro<Y> {
 	pub value: Option<Y>,
-	pub valid: bool,
 	
+	valid: bool,
 	coro: Box<Generator<Yield=Y, Return=()>>,
+}
+
+impl<Y> Coro<Y> {
+	pub fn is_valid(&self) -> bool { self.valid }
 }
 
 impl<Y, G> From<G> for Coro<Y> where G: 'static + Generator<Yield=Y, Return=()> {
@@ -73,9 +77,13 @@ impl<Y: Clone> Iterator for Coro<Y> {
 
 pub struct StackCoro<Y, G: Generator<Yield=Y, Return=()>> {
 	pub value: Option<Y>,
-	pub valid: bool,
 
+	valid: bool,
 	coro: G,
+}
+
+impl<Y, G> StackCoro<Y, G> where G: Generator<Yield=Y, Return=()> {
+	pub fn is_valid(&self) -> bool { self.valid }
 }
 
 impl<Y, G> From<G> for StackCoro<Y, G> where G: Generator<Yield=Y, Return=()> {
