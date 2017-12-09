@@ -101,7 +101,7 @@ impl Mesh {
 
 pub struct MeshBuilder<V: Vertex> {
 	verts: Vec<V>,
-	indices: Vec<u16>, // NOTE: could probably be an option
+	indices: Vec<u16>, // NOTE: index type be an option
 }
 
 impl<V> MeshBuilder<V> where V: Vertex {

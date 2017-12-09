@@ -52,6 +52,8 @@ fn main() {
 			on_resize(0, null(), evt_ptr);
 			emscripten_set_resize_callback(null(), evt_ptr, 0, Some(on_resize));
 			emscripten_set_click_callback(null(), evt_ptr, 0, Some(on_click));
+			emscripten_set_mousemove_callback(null(), evt_ptr, 0, Some(on_move));
+			emscripten_set_touchmove_callback(null(), evt_ptr, 0, Some(on_touch_move));
 
 			gl::Enable(gl::BLEND);
 			gl::BlendEquation(gl::FUNC_ADD);
@@ -96,6 +98,16 @@ fn main() {
 						flowers.add_flower(norm);
 						particles.add_pop(norm);
 					}
+
+					Event::Move(pos) => {
+						let sz = screen_size.to_vec2();
+						let aspect = sz.x as f32 / sz.y as f32;
+
+						let norm = pos.to_vec2() / screen_size.to_vec2() * 2.0 - Vec2::splat(1.0);
+						let norm = norm * Vec2::new(aspect, -1.0);
+
+						console::set_section("Input", format!("{:.2}, {:.2}", norm.x, norm.y));
+					}
 				}
 			}
 
@@ -123,6 +135,7 @@ fn main() {
 enum Event {
 	Resize(Vec2i),
 	Click(Vec2i),
+	Move(Vec2i),
 }
 
 unsafe extern "C"
@@ -146,6 +159,29 @@ fn on_click(_: i32, e: *const EmscriptenMouseEvent, ud: *mut CVoid) -> i32 {
 	let e: &EmscriptenMouseEvent = std::mem::transmute(e);
 
 	event_queue.push(Event::Click(Vec2i::new(e.clientX as _, e.clientY as _)));
+	
+	0
+}
+
+
+unsafe extern "C"
+fn on_move(_: i32, e: *const EmscriptenMouseEvent, ud: *mut CVoid) -> i32 {
+	let event_queue: &mut Vec<Event> = std::mem::transmute(ud);
+	let e: &EmscriptenMouseEvent = std::mem::transmute(e);
+
+	event_queue.push(Event::Move(Vec2i::new(e.clientX as _, e.clientY as _)));
+	
+	0
+}
+
+
+unsafe extern "C"
+fn on_touch_move(_: i32, e: *const EmscriptenTouchEvent, ud: *mut CVoid) -> i32 {
+	let event_queue: &mut Vec<Event> = std::mem::transmute(ud);
+	let e: &EmscriptenTouchEvent = std::mem::transmute(e);
+
+	if e.touches[0].identifier != 0 { return 0 }
+	event_queue.push(Event::Move(Vec2i::new(e.touches[0].clientX as _, e.touches[0].clientY as _)));
 	
 	0
 }

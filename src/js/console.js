@@ -11,6 +11,7 @@ var LibraryConsoleExtensions = {
 		console_el.style.top = '5px';
 		console_el.style.position = 'absolute';
 		console_el.style.fontFamily = 'sans-serif';
+		console_el.style.pointerEvents = 'none';
 
 		document.getElementsByTagName("body")[0].appendChild(console_el);
 	},
