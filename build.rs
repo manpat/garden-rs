@@ -40,12 +40,18 @@ r##"<html>
 </html>"##;
 
 fn main() {
+	let profile = env::var("PROFILE").unwrap();
+
 	let index_html = INDEX_HTML_TEMPLATE.to_string()
-		.replace("[[build_type]]", &env::var("PROFILE").unwrap())
+		.replace("[[build_type]]", &profile)
 		.replace("[[pkg_name]]", env!("CARGO_PKG_NAME"));
 	let dest = env::var("CARGO_MANIFEST_DIR").unwrap();
 	let path = Path::new(&dest).join("index.html");
 	let mut file = File::create(&path).unwrap();
 
 	file.write_all(index_html.as_bytes()).unwrap();
+
+	if profile == "debug" {
+        println!("cargo:rustc-cfg=debug");
+    }
 }

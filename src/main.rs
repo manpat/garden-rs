@@ -113,7 +113,6 @@ fn main() {
 
 			let dur = frame_start.elapsed();
 			console::set_section("Stats", format!("frame time: {:.1}ms", dur.subsec_nanos() as f64 / 1000_000.0));
-
 			console::update();
 
 			yield;

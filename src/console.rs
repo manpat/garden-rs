@@ -1,3 +1,5 @@
+#![allow(unused_variables, unused_imports, dead_code)]
+
 use std::collections::HashMap;
 use bindings::console::*;
 
@@ -20,6 +22,7 @@ fn get_state() -> &'static mut State {
 }
 
 pub fn init() {
+	#[cfg(debug)]
 	unsafe {
 		init_console();
 
@@ -32,45 +35,51 @@ pub fn init() {
 }
 
 pub fn set_text(s: &str) {
-	get_state().buffer = String::from(s);
-	get_state().dirty = ConsoleDirtiness::Buffer;
+	#[cfg(debug)] {
+		get_state().buffer = String::from(s);
+		get_state().dirty = ConsoleDirtiness::Buffer;
+	}
 }
 
 pub fn set_section<S, S2>(sect: S, s: S2) where S: Into<String>, S2: Into<String> {
-	get_state().entries.insert(sect.into(), s.into());
-	get_state().dirty = ConsoleDirtiness::Map;
+	#[cfg(debug)] {
+		get_state().entries.insert(sect.into(), s.into());
+		get_state().dirty = ConsoleDirtiness::Map;
+	}
 }
 
 pub fn set_color<S>(s: S) where S: Into<Vec<u8>> {
-	unsafe {
+	#[cfg(debug)] unsafe {
 		use std::ffi::CString;
 		set_console_color(CString::new(s).unwrap().as_ptr());
 	}
 }
 
 pub fn update() {
-	use std::fmt::Write;
-	use std::ffi::CString;
-	use self::ConsoleDirtiness::*;
+	#[cfg(debug)] {
+		use std::fmt::Write;
+		use std::ffi::CString;
+		use self::ConsoleDirtiness::*;
 	
-	match get_state().dirty {
-		Buffer => unsafe {
-			set_console_text(CString::new(get_state().buffer.as_str()).unwrap().as_ptr());
-		}
-
-		Map => unsafe {
-			let buf = &mut get_state().buffer;
-			buf.clear();
-
-			for (k, v) in get_state().entries.iter() {
-				write!(buf, "<h3>{}</h3><div>{}</div><br/>", k, v).unwrap();
+		match get_state().dirty {
+			Buffer => unsafe {
+				set_console_text(CString::new(get_state().buffer.as_str()).unwrap().as_ptr());
 			}
 
-			set_console_text(CString::new(buf.as_str()).unwrap().as_ptr());
+			Map => unsafe {
+				let buf = &mut get_state().buffer;
+				buf.clear();
+
+				for (k, v) in get_state().entries.iter() {
+					write!(buf, "<h3>{}</h3><div>{}</div><br/>", k, v).unwrap();
+				}
+
+				set_console_text(CString::new(buf.as_str()).unwrap().as_ptr());
+			}
+
+			Clean => {}
 		}
 
-		Clean => {}
+		get_state().dirty = Clean;
 	}
-
-	get_state().dirty = Clean;
 }

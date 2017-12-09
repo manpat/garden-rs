@@ -24,14 +24,14 @@ impl Vertex for PaperVertex {
 	}
 }
 
-static mut PAPER_COUNT: u32 = 0;
+#[cfg(debug)] static mut PAPER_COUNT: u32 = 0;
 
 pub struct Paper {
 	builder: MeshBuilder<PaperVertex>,
 	mesh: Mesh,
-
 	vert_buffer: Vec<PaperVertex>,
-	id: u32,
+
+	#[cfg(debug)] id: u32,
 }
 
 impl Paper {
@@ -41,6 +41,8 @@ impl Paper {
 			mesh: Mesh::new(),
 
 			vert_buffer: Vec::with_capacity(16),
+
+			#[cfg(debug)]
 			id: unsafe {
 				PAPER_COUNT += 1;
 				PAPER_COUNT
@@ -57,6 +59,7 @@ impl Paper {
 		self.mesh.bind();
 		self.mesh.draw(gl::TRIANGLES);
 
+		#[cfg(debug)]
 		::console::set_section(format!("Paper #{}", self.id), format!("#verts: {} <br/> #indices: {}",
 			self.builder.get_vertex_count(),
 			self.builder.get_index_count()
