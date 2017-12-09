@@ -7,57 +7,70 @@ enum ConsoleDirtiness {
 	Map,
 }
 
-pub struct Console {
-	entries: HashMap<&'static str, String>,
+struct State {
+	entries: HashMap<String, String>,
 	buffer: String,
 	dirty: ConsoleDirtiness
 }
 
-impl Console {
-	pub fn new() -> Self {
-		unsafe { init_console(); }
+static mut CONSOLE_STATE: Option<State> = None;
 
-		Console {
+fn get_state() -> &'static mut State {
+	unsafe { CONSOLE_STATE.as_mut().unwrap() }
+}
+
+pub fn init() {
+	unsafe {
+		init_console();
+
+		CONSOLE_STATE = Some(State {
 			entries: HashMap::new(),
 			buffer: String::new(),
 			dirty: ConsoleDirtiness::Clean,
-		}
+		});
 	}
+}
 
-	pub fn set_text(&mut self, s: &str) {
-		self.buffer = String::from(s);
-		self.dirty = ConsoleDirtiness::Buffer;
-	}
+pub fn set_text(s: &str) {
+	get_state().buffer = String::from(s);
+	get_state().dirty = ConsoleDirtiness::Buffer;
+}
 
-	pub fn set_section(&mut self, sect: &'static str, s: &str) {
-		self.entries.insert(sect, String::from(s));
-		self.dirty = ConsoleDirtiness::Map;
-	}
+pub fn set_section<S, S2>(sect: S, s: S2) where S: Into<String>, S2: Into<String> {
+	get_state().entries.insert(sect.into(), s.into());
+	get_state().dirty = ConsoleDirtiness::Map;
+}
 
-	pub fn update(&mut self) {
-		use std::fmt::Write;
+pub fn set_color<S>(s: S) where S: Into<Vec<u8>> {
+	unsafe {
 		use std::ffi::CString;
-		use self::ConsoleDirtiness::*;
-		
-		match self.dirty {
-			Buffer => unsafe {
-				set_console_text(CString::new(self.buffer.as_str()).unwrap().as_ptr());
-			}
+		set_console_color(CString::new(s).unwrap().as_ptr());
+	}
+}
 
-			Map => unsafe {
-				let buf = &mut self.buffer;
-				buf.clear();
-
-				for (k, v) in self.entries.iter() {
-					write!(buf, "<h3>{}</h3><div>{}</div><br/>", k, v).unwrap();
-				}
-
-				set_console_text(CString::new(buf.as_str()).unwrap().as_ptr());
-			}
-
-			Clean => {}
+pub fn update() {
+	use std::fmt::Write;
+	use std::ffi::CString;
+	use self::ConsoleDirtiness::*;
+	
+	match get_state().dirty {
+		Buffer => unsafe {
+			set_console_text(CString::new(get_state().buffer.as_str()).unwrap().as_ptr());
 		}
 
-		self.dirty = Clean;
+		Map => unsafe {
+			let buf = &mut get_state().buffer;
+			buf.clear();
+
+			for (k, v) in get_state().entries.iter() {
+				write!(buf, "<h3>{}</h3><div>{}</div><br/>", k, v).unwrap();
+			}
+
+			set_console_text(CString::new(buf.as_str()).unwrap().as_ptr());
+		}
+
+		Clean => {}
 	}
+
+	get_state().dirty = Clean;
 }

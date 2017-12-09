@@ -97,6 +97,8 @@ impl FlowerManager {
 		for coro in self.flower_updates.iter_mut() { coro.next(); }
 
 		self.flower_updates.retain(Coro::is_valid);
+
+		::console::set_section("Flowers", format!("{} flowers", self.flower_descriptions.len()));
 	}
 
 	pub fn add_flower(&mut self, pos: Vec2) {

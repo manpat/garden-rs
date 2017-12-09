@@ -117,6 +117,9 @@ impl<V> MeshBuilder<V> where V: Vertex {
 		self.indices.clear();
 	}
 
+	pub fn get_vertex_count(&self) -> usize { self.verts.len() }
+	pub fn get_index_count(&self) -> usize { self.indices.len() }
+
 	pub fn upload_to(&self, mesh: &mut Mesh) {
 		unsafe {
 			mesh.layout = V::get_layout();

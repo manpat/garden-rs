@@ -1,4 +1,5 @@
 #![feature(generators, generator_trait, box_syntax)]
+#![feature(inclusive_range_syntax)]
 #![feature(specialization)]
 #![feature(ord_max_min)]
 #![feature(link_args)]
@@ -14,7 +15,7 @@ pub use common::*;
 
 pub mod resources;
 pub mod rendering;
-// pub mod console;
+pub mod console;
 pub mod webgl;
 
 pub mod paper;
@@ -23,7 +24,6 @@ pub mod particle;
 
 use bindings::emscripten::*;
 use coro_util::*;
-// use console::*;
 use webgl::*;
 
 use paper::*;
@@ -33,10 +33,12 @@ use particle::*;
 use rendering::gl;
 use rendering::shader::*;
 
+use std::time::Instant;
+
 fn main() {
 	set_coro_as_main_loop(|| {
-		// let mut console = Console::new();
-		// console.set_text("Hello");
+		console::init();
+		console::set_color("#222");
 
 		let _gl = WebGLContext::new();
 
@@ -71,6 +73,8 @@ fn main() {
 		flowers.add_flower(Vec2::new(0.0, -0.1));
 
 		loop {
+			let frame_start = Instant::now();
+
 			for e in events.iter() {
 				match *e {
 					Event::Resize(sz) => unsafe {
@@ -99,7 +103,6 @@ fn main() {
 
 			unsafe { gl::Clear(gl::COLOR_BUFFER_BIT); }
 
-			// console.update();
 			flowers.update();
 
 			paper.clear();
@@ -107,6 +110,11 @@ fn main() {
 			paper.draw();
 
 			particles.draw();
+
+			let dur = frame_start.elapsed();
+			console::set_section("Stats", format!("frame time: {:.1}ms", dur.subsec_nanos() as f64 / 1000_000.0));
+
+			console::update();
 
 			yield;
 		}
