@@ -18,6 +18,11 @@ r##"<html>
 			* {
 				margin: 0;
 				padding: 0;
+				user-select: none;
+				-moz-user-select: none;
+				-khtml-user-select: none;
+				-webkit-user-select: none;
+				-o-user-select: none;
 			}
 
 			html, body {
@@ -35,9 +40,10 @@ r##"<html>
 
 	<body>
 		<canvas id="canvas"></canvas>
-		<script src="target/asmjs-unknown-emscripten/[[build_type]]/[[pkg_name]].js"></script>
+		<script src="[[pkg_name]]/[[build_type]].js"></script>
 	</body>
 </html>"##;
+		// <script src="target/asmjs-unknown-emscripten/[[build_type]]/[[pkg_name]].js"></script>
 
 fn main() {
 	let profile = env::var("PROFILE").unwrap();
@@ -52,6 +58,6 @@ fn main() {
 	file.write_all(index_html.as_bytes()).unwrap();
 
 	if profile == "debug" {
-        println!("cargo:rustc-cfg=debug");
-    }
+		println!("cargo:rustc-cfg=debug");
+	}
 }
