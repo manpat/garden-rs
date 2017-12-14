@@ -43,7 +43,6 @@ r##"<html>
 		<script src="[[pkg_name]]/[[build_type]].js"></script>
 	</body>
 </html>"##;
-		// <script src="target/asmjs-unknown-emscripten/[[build_type]]/[[pkg_name]].js"></script>
 
 fn main() {
 	let profile = env::var("PROFILE").unwrap();

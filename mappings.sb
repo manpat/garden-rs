@@ -1,0 +1,3 @@
+/garden => index.html
+/garden/debug.js => target/asmjs-unknown-emscripten/debug/garden.js
+/garden/release.js => target/asmjs-unknown-emscripten/release/garden.js
