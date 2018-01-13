@@ -98,8 +98,6 @@ fn main() {
 
 			events.clear();
 
-			unsafe { gl::Clear(gl::COLOR_BUFFER_BIT); }
-
 			flowers.update();
 
 			paper.clear();

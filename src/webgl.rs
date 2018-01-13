@@ -10,7 +10,7 @@ impl WebGLContext {
 		let ems_context_handle = unsafe {
 			let mut attribs = uninitialized();
 			emscripten_webgl_init_context_attributes(&mut attribs);
-			attribs.alpha = 0;
+			attribs.alpha = 1;
 			attribs.stencil = 1;
 			attribs.antialias = 1;
 			attribs.preserveDrawingBuffer = 0;
@@ -41,12 +41,6 @@ impl WebGLContext {
 
 		if unsafe {emscripten_webgl_make_context_current(ems_context_handle) != EMSCRIPTEN_RESULT_SUCCESS} {
 			panic!("Failed to make webgl context current");
-		}
-
-		unsafe {
-			gl::ClearColor(0.2, 0.2, 0.2, 1.0);
-			gl::Clear(gl::COLOR_BUFFER_BIT);
-			gl::FrontFace(gl::CCW);
 		}
 
 		WebGLContext {}
