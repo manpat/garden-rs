@@ -1,5 +1,4 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+use mut_rc::*;
 
 use coro_util::*;
 use common::*;
@@ -22,7 +21,7 @@ struct Flower {
 }
 
 pub struct FlowerManager {
-	flower_descriptions: Vec<Rc<RefCell<Flower>>>,
+	flower_descriptions: Vec<MutRc<Flower>>,
 	flower_updates: Vec<Coro<()>>,
 	wind_strength_phase: f32,
 	wind_phase: f32,
@@ -129,17 +128,14 @@ impl FlowerManager {
 
 		let color = rng.next_f32().ease_linear(c0, c1);
 
-		let flower = Rc::new(RefCell::new(Flower {
+		let flower = MutRc::new(Flower {
 			pos, color,
 			stem_length: 0.0,
 			stem_width: 0.01,
 			face_radius: 0.0,
 
 			variation,
-		}));
-
-		self.flower_descriptions.push(flower.clone());
-		self.flower_descriptions.sort_unstable_by(|a, b| b.borrow().pos.y.partial_cmp(&a.borrow().pos.y).unwrap());
+		});
 
 		let target_face_radius: f32 = match variation {
 			FlowerType::Circle =>			rng.gen_range(0.08, 0.11),
@@ -149,5 +145,8 @@ impl FlowerManager {
 		self.flower_updates.push( parameter_lerp!(flower.stem_width -> 0.05, 0.5, ease_back_out) );
 		self.flower_updates.push( parameter_lerp!(flower.stem_length -> rng.gen_range(0.13, 0.2), 0.5, ease_back_out) );
 		self.flower_updates.push( parameter_lerp!(flower.face_radius -> target_face_radius, 0.5, ease_back_out) );
+
+		self.flower_descriptions.push(flower);
+		self.flower_descriptions.sort_unstable_by(|a, b| b.borrow().pos.y.partial_cmp(&a.borrow().pos.y).unwrap());
 	}
 }

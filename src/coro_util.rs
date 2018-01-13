@@ -126,24 +126,36 @@ impl<Y, G> Iterator for StackCoro<Y, G> where Y: Clone, G: Generator<Yield=Y, Re
 
 
 macro_rules! parameter_lerp {
-	( $rc_obj:ident.$param:ident -> $to:expr, $duration:expr, $ease:ident ) => {{
+	( ($rc_obj:expr).$param:ident -> $to:expr, $duration:tt @ $delay:expr, $ease:ident ) => {{
 		let rc_obj = $rc_obj.clone();
 
 		let from = rc_obj.borrow().$param;
 		let to = $to;
 
+		let delay_frames = ($delay * 60.0) as u32; 
 		let num_frames = ($duration * 60.0) as u32;
 
 		Coro::from(move || {
+			for _ in 0..delay_frames { yield }
+
 			for i in 0..num_frames {
 				let prog = i as f32 / num_frames as f32;
 				rc_obj.borrow_mut().$param = prog.$ease(from, to);
 				yield;
 			}
+
+			rc_obj.borrow_mut().$param = to;
 		})
 	}};
 
-	( $rc_obj:ident.$param:ident -> $to:expr, $duration:expr ) => {{
-		parameter_lerp!( $rc_obj.$param -> $to, $duration, ease_linear )
+	( ($rc_obj:expr).$param:ident -> $to:expr, $duration:expr, $ease:ident ) => {{
+		parameter_lerp!( ($rc_obj).$param -> $to, $duration @ 0.0, $ease )
+	}};
+
+	( $rc_obj:ident.$param:ident -> $to:expr, $duration:tt, $ease:ident ) => {{
+		parameter_lerp!( ($rc_obj).$param -> $to, $duration @ 0.0, $ease )
+	}};
+	( $rc_obj:ident.$param:ident -> $to:expr, $duration:tt @ $delay:expr, $ease:ident ) => {{
+		parameter_lerp!( ($rc_obj).$param -> $to, $duration @ $delay, $ease )
 	}};
 }
