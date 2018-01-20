@@ -58,8 +58,6 @@ fn main() {
 			gl::Enable(gl::BLEND);
 			gl::BlendEquation(gl::FUNC_ADD);
 			gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
-
-			gl::ClearColor(0.41, 0.80, 0.51, 1.0);
 		}
 
 		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS);
