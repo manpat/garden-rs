@@ -10,6 +10,7 @@ extern crate web_common;
 
 pub use resources as res;
 pub use web_common::*;
+use web_common::events::*;
 
 pub mod resources;
 pub mod console;
@@ -32,13 +33,7 @@ fn main() {
 		let mut events = Vec::new();
 
 		unsafe {
-			use std::ptr::null;
-
-			let evt_ptr = std::mem::transmute(&mut events);
-
-			on_resize(0, null(), evt_ptr);
-			emscripten_set_resize_callback(null(), evt_ptr, 0, Some(on_resize));
-			emscripten_set_click_callback(null(), evt_ptr, 0, Some(on_click));
+			initialise_ems_event_queue(&mut events);
 
 			gl::Enable(gl::BLEND);
 			gl::BlendEquation(gl::FUNC_ADD);
@@ -76,6 +71,8 @@ fn main() {
 						particles.add_pop(pos);
 						flowers.add_flower(pos);
 					}
+
+					_ => {}
 				}
 			}
 
@@ -109,34 +106,3 @@ fn screen_to_gl(screen_size: Vec2i, v: Vec2i) -> Vec2{
 	let norm = v.to_vec2() / screen_size.to_vec2() * 2.0 - Vec2::splat(1.0);
 	norm * Vec2::new(aspect, -1.0)
 }
-
-enum Event {
-	Resize(Vec2i),
-	Click(Vec2i),
-}
-
-unsafe extern "C"
-fn on_resize(_: i32, _e: *const EmscriptenUiEvent, ud: *mut CVoid) -> i32 {
-	let event_queue: &mut Vec<Event> = std::mem::transmute(ud);
-
-	js! { b"Module.canvas = document.getElementById('canvas')\0" };
-
-	let mut screen_size = Vec2i::zero();
-	screen_size.x = js! { b"return (Module.canvas.width = Module.canvas.style.width = window.innerWidth)\0" };
-	screen_size.y = js! { b"return (Module.canvas.height = Module.canvas.style.height = window.innerHeight)\0" };
-
-	event_queue.push(Event::Resize(screen_size));
-	
-	0
-}
-
-unsafe extern "C"
-fn on_click(_: i32, e: *const EmscriptenMouseEvent, ud: *mut CVoid) -> i32 {
-	let event_queue: &mut Vec<Event> = std::mem::transmute(ud);
-	let e: &EmscriptenMouseEvent = std::mem::transmute(e);
-
-	event_queue.push(Event::Click(Vec2i::new(e.clientX as _, e.clientY as _)));
-	
-	0
-}
-
