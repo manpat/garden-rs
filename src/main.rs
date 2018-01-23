@@ -28,7 +28,7 @@ fn main() {
 		console::init();
 		console::set_color("#222");
 
-		let _gl = WebGLContext::new(true);
+		let webgl = WebGLContext::new(false);
 
 		let mut events = Vec::new();
 
@@ -38,6 +38,8 @@ fn main() {
 			gl::Enable(gl::BLEND);
 			gl::BlendEquation(gl::FUNC_ADD);
 			gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+
+			webgl.set_background(Color::rgb8(105, 204, 130));
 		}
 
 		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS);
@@ -75,6 +77,8 @@ fn main() {
 					_ => {}
 				}
 			}
+
+			unsafe { gl::Clear(gl::COLOR_BUFFER_BIT); }
 
 			events.clear();
 
