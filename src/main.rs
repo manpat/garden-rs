@@ -66,7 +66,7 @@ fn main() {
 						shader.set_proj(&Mat4::scale(Vec3::new(1.0/aspect, 1.0, 1.0)));
 					}
 
-					Event::Click(pos) => {
+					Event::Up(pos) => {
 						let pos = screen_to_gl(screen_size, pos);
 						particles.add_pop(pos);
 						flowers.add_flower(pos);
