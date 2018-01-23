@@ -4,8 +4,6 @@ use std::rc::Rc;
 use common::*;
 use paper::*;
 
-use coro_util::*;
-
 pub struct ParticleManager {
 	paper: Rc<RefCell<Paper>>,
 	particle_systems: Vec<Coro<()>>

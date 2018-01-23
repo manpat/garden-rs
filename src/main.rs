@@ -5,35 +5,20 @@
 #![feature(link_args)]
 #![feature(const_fn)]
 
-extern crate common;
+#[macro_use]
+extern crate web_common;
 
 pub use resources as res;
-pub use common::*;
-
-#[macro_use] pub mod bindings;
-#[macro_use] pub mod coro_util;
-
-pub mod mut_rc;
+pub use web_common::*;
 
 pub mod resources;
-pub mod rendering;
 pub mod console;
-pub mod webgl;
 
-pub mod paper;
 pub mod flower;
 pub mod particle;
 
-use bindings::emscripten::*;
-use coro_util::*;
-use webgl::*;
-
-use paper::*;
 use flower::*;
 use particle::*;
-
-use rendering::gl;
-use rendering::shader::*;
 
 use std::time::Instant;
 
@@ -42,7 +27,7 @@ fn main() {
 		console::init();
 		console::set_color("#222");
 
-		let _gl = WebGLContext::new();
+		let _gl = WebGLContext::new(true);
 
 		let mut events = Vec::new();
 

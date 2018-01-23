@@ -6,4 +6,7 @@ build = "build.rs"
 
 [dependencies]
 # common = { path = "../common" }
-common = { git = "https://github.com/manpat/common-rs.git" }
+# common = { git = "https://github.com/manpat/common-rs.git" }
+
+web-common = { git = "https://github.com/manpat/web-common-rs.git" }
+# web-common = { path = "../web-common" }

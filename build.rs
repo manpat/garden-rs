@@ -60,5 +60,6 @@ fn main() {
 
 	if profile == "debug" {
 		println!("cargo:rustc-cfg=debug");
+		// println!("cargo:rustc-cfg=dom_console");
 	}
 }

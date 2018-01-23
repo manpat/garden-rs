@@ -1,7 +1,14 @@
 #![allow(unused_variables, unused_imports, dead_code)]
 
 use std::collections::HashMap;
-use bindings::console::*;
+
+#[allow(unused_attributes)]
+#[link_args = "--js-library src/js/console.js"]
+extern "C" {
+	pub fn init_console();
+	pub fn set_console_text(s: *const i8);
+	pub fn set_console_color(s: *const i8);
+}
 
 enum ConsoleDirtiness {
 	Clean,
@@ -22,7 +29,7 @@ fn get_state() -> &'static mut State {
 }
 
 pub fn init() {
-	#[cfg(debug)]
+	#[cfg(dom_console)]
 	unsafe {
 		init_console();
 
@@ -35,28 +42,28 @@ pub fn init() {
 }
 
 pub fn set_text(s: &str) {
-	#[cfg(debug)] {
+	#[cfg(dom_console)] {
 		get_state().buffer = String::from(s);
 		get_state().dirty = ConsoleDirtiness::Buffer;
 	}
 }
 
 pub fn set_section<S, S2>(sect: S, s: S2) where S: Into<String>, S2: Into<String> {
-	#[cfg(debug)] {
+	#[cfg(dom_console)] {
 		get_state().entries.insert(sect.into(), s.into());
 		get_state().dirty = ConsoleDirtiness::Map;
 	}
 }
 
 pub fn set_color<S>(s: S) where S: Into<Vec<u8>> {
-	#[cfg(debug)] unsafe {
+	#[cfg(dom_console)] unsafe {
 		use std::ffi::CString;
 		set_console_color(CString::new(s).unwrap().as_ptr());
 	}
 }
 
 pub fn update() {
-	#[cfg(debug)] {
+	#[cfg(dom_console)] {
 		use std::fmt::Write;
 		use std::ffi::CString;
 		use self::ConsoleDirtiness::*;
