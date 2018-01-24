@@ -50,7 +50,7 @@ dependencies = [
 [[package]]
 name = "web-common"
 version = "0.1.0"
-source = "git+https://github.com/manpat/web-common-rs.git#7be7507979a86d2173f6e2334c06d3621f6020a9"
+source = "git+https://github.com/manpat/web-common-rs.git#e2771ac7befcb9e3f79a0050260cb94fc3a0b296"
 dependencies = [
  "common 0.1.0 (git+https://github.com/manpat/common-rs.git)",
 ]

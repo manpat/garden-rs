@@ -42,7 +42,7 @@ fn main() {
 			webgl.set_background(Color::rgb8(105, 204, 130));
 		}
 
-		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS);
+		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS).unwrap();
 		shader.use_program();
 
 		let mut screen_size = Vec2i::zero();
