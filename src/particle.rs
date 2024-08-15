@@ -31,7 +31,7 @@ impl ParticleManager {
 	pub fn add_pop(&mut self, pos: Vec2) {
 		let paper = self.paper.clone();
 
-		self.particle_systems.push(Coro::from(move || {
+		self.particle_systems.push(Coro::from(#[coroutine] move || {
 			let dt = 1.0 / 60.0;
 			let mut progress = 0.0;
 
@@ -40,9 +40,9 @@ impl ParticleManager {
 
 				let mut paper = paper.borrow_mut();
 
-				let inner_radius = progress.ease_quad_out(0.0, 0.079);
-				let outer_radius = progress.ease_quad_out(0.04, 0.08);
-				let thickness = (progress*2.0 - 1.0).ease_quad_in(0.02, 0.001);
+				let inner_radius = progress.ease_quad_out().lerp(0.0, 0.079);
+				let outer_radius = progress.ease_quad_out().lerp(0.04, 0.08);
+				let thickness = (progress*2.0 - 1.0).ease_quad_in().lerp(0.02, 0.001);
 
 				let inc = 2.0 * PI / 6.0;
 

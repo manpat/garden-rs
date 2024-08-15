@@ -1,9 +1,5 @@
-#![feature(generators, generator_trait, box_syntax)]
-#![feature(inclusive_range_syntax)]
+#![feature(coroutines, coroutine_trait)]
 #![feature(specialization)]
-#![feature(ord_max_min)]
-#![feature(link_args)]
-#![feature(const_fn)]
 
 #[macro_use]
 extern crate web_common;
@@ -24,7 +20,7 @@ use particle::*;
 use std::time::Instant;
 
 fn main() {
-	set_coro_as_main_loop(|| {
+	set_coro_as_main_loop(#[coroutine] || {
 		console::init();
 		console::set_color("#222");
 
@@ -42,7 +38,7 @@ fn main() {
 			webgl.set_background(Color::rgb8(105, 204, 130));
 		}
 
-		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS);
+		let shader = Shader::new(res::shaders::PAPER_VS, res::shaders::PAPER_FS).unwrap();
 		shader.use_program();
 
 		let mut screen_size = Vec2i::zero();

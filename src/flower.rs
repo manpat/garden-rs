@@ -1,6 +1,8 @@
 use common::*;
 use paper::*;
 
+use rand::seq::SliceRandom;
+
 #[derive(Copy, Clone)]
 enum FlowerType {
 	Circle,
@@ -44,7 +46,7 @@ impl FlowerManager {
 			let wind_variation = (flower.pos.x + flower.pos.y) * wind_variability;
 
 			let wind_strength = ((self.wind_strength_phase - wind_variation) * PI * 2.0).cos() * 0.5 + 0.5;
-			let wind_strength = wind_strength.ease_linear(0.2, 1.0);
+			let wind_strength = wind_strength.lerp(0.2, 1.0);
 
 			let wind_omega = (self.wind_phase - wind_variation) * PI * 2.0;
 			let face_delay = 0.3;
@@ -113,17 +115,17 @@ impl FlowerManager {
 		let variations = [
 			FlowerType::Circle,
 			FlowerType::Fern{
-				count: rng.gen_range(2, 6),
-				face_ratio: rng.gen_range(0.7, 1.0)
+				count: rng.gen_range(2..6),
+				face_ratio: rng.gen_range(0.7..1.0)
 			},
 		];
 
-		let variation = *rng.choose(&variations).unwrap();
+		let variation = *variations.choose(&mut rng).unwrap();
 
-		let c0 = *rng.choose(&colors).unwrap();
-		let c1 = *rng.choose(&colors).unwrap();
+		let c0 = *colors.choose(&mut rng).unwrap();
+		let c1 = *colors.choose(&mut rng).unwrap();
 
-		let color = rng.next_f32().ease_linear(c0, c1);
+		let color = rng.gen::<f32>().lerp(c0, c1);
 
 		let flower = MutRc::new(Flower {
 			pos, color,
@@ -135,12 +137,12 @@ impl FlowerManager {
 		});
 
 		let target_face_radius: f32 = match variation {
-			FlowerType::Circle =>			rng.gen_range(0.08, 0.11),
-			FlowerType::Fern{..} =>			rng.gen_range(0.06, 0.09),
+			FlowerType::Circle =>			rng.gen_range(0.08..0.11),
+			FlowerType::Fern{..} =>			rng.gen_range(0.06..0.09),
 		};
 
 		self.flower_updates.push( parameter_lerp!(flower.stem_width -> 0.05, 0.5, ease_back_out) );
-		self.flower_updates.push( parameter_lerp!(flower.stem_length -> rng.gen_range(0.13, 0.2), 0.5, ease_back_out) );
+		self.flower_updates.push( parameter_lerp!(flower.stem_length -> rng.gen_range(0.13..0.2), 0.5, ease_back_out) );
 		self.flower_updates.push( parameter_lerp!(flower.face_radius -> target_face_radius, 0.5, ease_back_out) );
 
 		self.flower_descriptions.push(flower);
